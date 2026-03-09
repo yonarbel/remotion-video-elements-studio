@@ -7,7 +7,11 @@ import { TerminalSkillInstall } from "./TerminalSkillInstall";
 import { SplitScreenSecure } from "./SplitScreenSecure";
 import { MaliciousSkillDemo } from "./MaliciousSkillDemo";
 import { SkillLifecycle } from "./SkillLifecycle";
-import { LowerThirdPublish, LowerThirdArtifactory, LowerThirdSearch, LowerThirdInstall, LowerThirdEvidence, LowerThirdExportKeys, LowerThirdMalicious, LowerThirdPublishBlocked, LowerThirdFixRepublish, LowerThirdGeneric, LowerThirdSchema } from "./LowerThirdPublish";
+import { LowerThirdGeneric, LowerThirdSchema } from "./LowerThirdPublish";
+import { TitleCard, TitleCardSchema } from "./TitleCard";
+import { CalloutBox, CalloutBoxSchema } from "./CalloutBox";
+import { CommandOverlay, CommandOverlaySchema } from "./CommandOverlay";
+import { StepProgressBar, StepProgressBarSchema } from "./StepProgressBar";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -69,78 +73,6 @@ export const RemotionRoot: React.FC = () => {
         height={450}
       />
       <Composition
-        id="LowerThirdPublish"
-        component={LowerThirdPublish}
-        durationInFrames={150}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="LowerThirdArtifactory"
-        component={LowerThirdArtifactory}
-        durationInFrames={150}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="LowerThirdSearch"
-        component={LowerThirdSearch}
-        durationInFrames={150}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="LowerThirdInstall"
-        component={LowerThirdInstall}
-        durationInFrames={150}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="LowerThirdEvidence"
-        component={LowerThirdEvidence}
-        durationInFrames={150}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="LowerThirdExportKeys"
-        component={LowerThirdExportKeys}
-        durationInFrames={150}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="LowerThirdMalicious"
-        component={LowerThirdMalicious}
-        durationInFrames={150}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="LowerThirdPublishBlocked"
-        component={LowerThirdPublishBlocked}
-        durationInFrames={150}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="LowerThirdFixRepublish"
-        component={LowerThirdFixRepublish}
-        durationInFrames={150}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
         id="LowerThird"
         component={LowerThirdGeneric}
         schema={LowerThirdSchema}
@@ -149,6 +81,64 @@ export const RemotionRoot: React.FC = () => {
           subtitle: "Your subtitle here",
         }}
         durationInFrames={150}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="TitleCard"
+        component={TitleCard}
+        schema={TitleCardSchema}
+        defaultProps={{
+          title: "Your Video Title",
+          subtitle: "A short description of what this video covers",
+        }}
+        durationInFrames={150}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="CalloutBox"
+        component={CalloutBox}
+        schema={CalloutBoxSchema}
+        defaultProps={{
+          type: "tip",
+          position: "top-right",
+          text: "Always verify skill signatures before installing in production.",
+        }}
+        durationInFrames={120}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="CommandOverlay"
+        component={CommandOverlay}
+        schema={CommandOverlaySchema}
+        defaultProps={{
+          command: "jf skill publish --sign --evidence",
+          label: "Terminal",
+          prompt: "»",
+          style: "terminal",
+          showLastLogin: false,
+        }}
+        durationInFrames={180}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="StepProgressBar"
+        component={StepProgressBar}
+        schema={StepProgressBarSchema}
+        defaultProps={{
+          steps: "Create Skill, Sign & Publish, Install, Execute",
+          position: "top",
+          celebrate: true,
+          celebrationHold: 2,
+        }}
+        durationInFrames={300}
         fps={30}
         width={1920}
         height={1080}

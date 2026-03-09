@@ -141,69 +141,6 @@ export const LowerThird: React.FC<LowerThirdProps> = ({ title, subtitle }) => {
   );
 };
 
-export const LowerThirdPublish: React.FC = () => (
-  <LowerThird
-    title="Publishing Skill"
-    subtitle="jf skill publish → JFrog Platform"
-  />
-);
-
-export const LowerThirdArtifactory: React.FC = () => (
-  <LowerThird
-    title="Skill Repository"
-    subtitle="Browsing published skills in Artifactory"
-  />
-);
-
-export const LowerThirdSearch: React.FC = () => (
-  <LowerThird
-    title="Semantic Skill Search"
-    subtitle="jf skills search — natural language discovery"
-  />
-);
-
-export const LowerThirdInstall: React.FC = () => (
-  <LowerThird
-    title="Installing Skill"
-    subtitle="jf skills install — from Artifactory to agent"
-  />
-);
-
-export const LowerThirdEvidence: React.FC = () => (
-  <LowerThird
-    title="Evidence Validation"
-    subtitle="jf skills install — verifying signatures before install"
-  />
-);
-
-export const LowerThirdExportKeys: React.FC = () => (
-  <LowerThird
-    title="Exporting Keys"
-    subtitle="Sign skill and attach evidence"
-  />
-);
-
-export const LowerThirdMalicious: React.FC = () => (
-  <LowerThird
-    title="Injecting Malicious Command"
-    subtitle="Tampering with SKILL.md before publish"
-  />
-);
-
-export const LowerThirdPublishBlocked: React.FC = () => (
-  <LowerThird
-    title="Publish Blocked"
-    subtitle="Security scan detected malicious command — upload rejected"
-  />
-);
-
-export const LowerThirdFixRepublish: React.FC = () => (
-  <LowerThird
-    title="Fixing & Re-publishing"
-    subtitle="Removing malicious code → clean publish"
-  />
-);
-
 // ── Parametrized version (editable from Studio sidebar) ──
 export const LowerThirdSchema = z.object({
   title: z.string(),
