@@ -44,15 +44,24 @@ const CONFETTI_COLORS = [
 export const StepProgressBarSchema = z.object({
   steps: z.string(),
   position: z.enum(["top", "bottom"]),
+  size: z.enum(["small", "medium", "large"]),
   celebrate: z.boolean(),
   celebrationHold: z.number().min(0).max(10),
 });
 
+const SIZE_CONFIG = {
+  small: { circle: 36, font: 12, labelFont: 12, lineW: 48, pad: "16px 36px", gap: 6, radius: 16 },
+  medium: { circle: 52, font: 18, labelFont: 16, lineW: 72, pad: "24px 52px", gap: 10, radius: 18 },
+  large: { circle: 72, font: 26, labelFont: 22, lineW: 100, pad: "32px 64px", gap: 14, radius: 22 },
+} as const;
+
 export const StepProgressBar: React.FC<
   z.infer<typeof StepProgressBarSchema>
-> = ({ steps: stepsRaw, position, celebrate, celebrationHold }) => {
+> = ({ steps: stepsRaw, position, size, celebrate, celebrationHold }) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
+
+  const sz = SIZE_CONFIG[size];
 
   const stepLabels = stepsRaw
     .split(",")
@@ -68,7 +77,8 @@ export const StepProgressBar: React.FC<
   const exitStart = durationInFrames - EXIT_DUR;
 
   const advanceStart = ENTER_DUR + Math.round(fps * 0.3);
-  const advanceEnd = exitStart - holdFrames - Math.round(fps * 0.2);
+  const LAST_STEP_LOAD = Math.round(fps * 1.2);
+  const advanceEnd = exitStart - holdFrames - LAST_STEP_LOAD - Math.round(fps * 0.2);
   const advanceDuration = advanceEnd - advanceStart;
   const framesPerStep =
     count > 1 ? advanceDuration / (count - 1) : advanceDuration;
@@ -86,7 +96,14 @@ export const StepProgressBar: React.FC<
   );
 
   const lastStepFrame = stepActivationFrames[count - 1];
-  const allDone = activeIdx >= count - 1 && frame >= lastStepFrame;
+  const lastStepDoneFrame = lastStepFrame + LAST_STEP_LOAD;
+  const allDone = frame >= lastStepDoneFrame;
+
+  // 0→1 progress of the circular loader on the last step
+  const isLastStepLoading = activeIdx >= count - 1 && !allDone;
+  const loadArcProgress = isLastStepLoading
+    ? interpolate(frame, [lastStepFrame, lastStepDoneFrame], [0, 1], CL)
+    : 0;
 
   // ── Entrance ──
   const enterSpring = spring({
@@ -173,9 +190,9 @@ export const StepProgressBar: React.FC<
           style={{
             backgroundColor: "rgba(10, 12, 16, 0.92)",
             backdropFilter: "blur(24px)",
-            borderRadius: 16,
+            borderRadius: sz.radius,
             border: `1px solid ${allDone && celebrate ? JFROG_GREEN + "50" : "rgba(255,255,255,0.08)"}`,
-            padding: "16px 36px",
+            padding: sz.pad,
             boxShadow: allDone && celebrate
               ? `0 8px 40px rgba(0,0,0,0.5), 0 0 20px ${JFROG_GREEN}30`
               : "0 8px 40px rgba(0,0,0,0.5)",
@@ -220,6 +237,9 @@ export const StepProgressBar: React.FC<
                           ? rawProgress - activeIdx
                           : 0
                     }
+                    width={sz.lineW}
+                    thickness={Math.max(2, Math.round(sz.circle / 18))}
+                    labelOffset={sz.labelFont + sz.gap}
                   />
                 )}
 
@@ -228,56 +248,77 @@ export const StepProgressBar: React.FC<
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: 8,
-                    minWidth: 80,
+                    gap: sz.gap,
+                    minWidth: sz.circle + 40,
                   }}
                 >
                   <div
                     style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      position: "relative",
+                      width: sz.circle,
+                      height: sz.circle,
                       transform: `scale(${circleScale})`,
-                      backgroundColor: isCompleted
-                        ? DONE_GREEN
-                        : isActive
-                          ? "rgba(64, 190, 70, 0.15)"
-                          : IDLE_BG,
-                      border: `2px solid ${
-                        isCompleted
-                          ? DONE_GREEN
-                          : isActive
-                            ? JFROG_GREEN
-                            : IDLE_BORDER
-                      }`,
-                      boxShadow: isActive
-                        ? `0 0 14px ${JFROG_GREEN}40`
-                        : "none",
                     }}
                   >
-                    {isCompleted ? (
-                      <CheckSvg />
-                    ) : (
-                      <span
-                        style={{
-                          fontFamily: sans,
-                          fontSize: 14,
-                          fontWeight: 700,
-                          color: isActive ? JFROG_GREEN : IDLE_TEXT,
-                        }}
-                      >
-                        {i + 1}
-                      </span>
+                    {/* Circular loading arc for the last step */}
+                    {i === count - 1 && isLastStepLoading && (
+                      <CircularArc
+                        size={sz.circle}
+                        progress={loadArcProgress}
+                        strokeWidth={3}
+                      />
                     )}
+
+                    <div
+                      style={{
+                        width: sz.circle,
+                        height: sz.circle,
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: isCompleted
+                          ? DONE_GREEN
+                          : isActive || (i === count - 1 && isLastStepLoading)
+                            ? "rgba(64, 190, 70, 0.15)"
+                            : IDLE_BG,
+                        border: `2px solid ${
+                          isCompleted
+                            ? DONE_GREEN
+                            : isActive || (i === count - 1 && isLastStepLoading)
+                              ? "rgba(64, 190, 70, 0.25)"
+                              : IDLE_BORDER
+                        }`,
+                        boxShadow:
+                          isActive || (i === count - 1 && isLastStepLoading)
+                            ? `0 0 14px ${JFROG_GREEN}40`
+                            : "none",
+                      }}
+                    >
+                      {isCompleted ? (
+                        <CheckSvg size={Math.round(sz.circle * 0.44)} />
+                      ) : (
+                        <span
+                          style={{
+                            fontFamily: sans,
+                            fontSize: sz.font,
+                            fontWeight: 700,
+                            color:
+                              isActive || (i === count - 1 && isLastStepLoading)
+                                ? JFROG_GREEN
+                                : IDLE_TEXT,
+                          }}
+                        >
+                          {i + 1}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <span
                     style={{
                       fontFamily: sans,
-                      fontSize: 12,
+                      fontSize: sz.labelFont,
                       fontWeight: isActive || isCompleted ? 600 : 400,
                       color: isActive || isCompleted ? ACTIVE_TEXT : IDLE_TEXT,
                       textAlign: "center",
@@ -386,20 +427,74 @@ const ConfettiExplosion: React.FC<{
   );
 };
 
+/* ─── Circular loading arc (SVG) ─── */
+const CircularArc: React.FC<{
+  size: number;
+  progress: number;
+  strokeWidth: number;
+}> = ({ size, progress, strokeWidth }) => {
+  const svgSize = size + strokeWidth * 2 + 4;
+  const radius = size / 2 + strokeWidth / 2 + 1;
+  const circumference = 2 * Math.PI * radius;
+  const dashOffset = circumference * (1 - progress);
+
+  return (
+    <svg
+      width={svgSize}
+      height={svgSize}
+      style={{
+        position: "absolute",
+        top: -(strokeWidth + 2),
+        left: -(strokeWidth + 2),
+        transform: "rotate(-90deg)",
+        pointerEvents: "none",
+      }}
+    >
+      {/* Track */}
+      <circle
+        cx={svgSize / 2}
+        cy={svgSize / 2}
+        r={radius}
+        fill="none"
+        stroke="rgba(255,255,255,0.06)"
+        strokeWidth={strokeWidth}
+      />
+      {/* Progress */}
+      <circle
+        cx={svgSize / 2}
+        cy={svgSize / 2}
+        r={radius}
+        fill="none"
+        stroke={JFROG_GREEN}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        strokeDashoffset={dashOffset}
+        style={{
+          filter: `drop-shadow(0 0 4px ${JFROG_GREEN}80)`,
+        }}
+      />
+    </svg>
+  );
+};
+
 /* ─── Connector line ─── */
 const ConnectorLine: React.FC<{
   filled: boolean;
   progress: number;
-}> = ({ filled, progress }) => (
+  width: number;
+  thickness: number;
+  labelOffset: number;
+}> = ({ filled, progress, width, thickness, labelOffset }) => (
   <div
     style={{
-      width: 48,
-      height: 2,
+      width,
+      height: thickness,
       backgroundColor: "rgba(255,255,255,0.08)",
-      borderRadius: 1,
+      borderRadius: thickness / 2,
       marginLeft: 6,
       marginRight: 6,
-      marginBottom: 24,
+      marginBottom: labelOffset,
       position: "relative",
       overflow: "hidden",
     }}
@@ -412,7 +507,7 @@ const ConnectorLine: React.FC<{
         height: "100%",
         width: `${(filled ? 1 : Math.max(0, Math.min(1, progress))) * 100}%`,
         backgroundColor: JFROG_GREEN,
-        borderRadius: 1,
+        borderRadius: thickness / 2,
         boxShadow: `0 0 6px ${JFROG_GREEN}40`,
       }}
     />
@@ -420,8 +515,8 @@ const ConnectorLine: React.FC<{
 );
 
 /* ─── Checkmark SVG ─── */
-const CheckSvg: React.FC = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+const CheckSvg: React.FC<{ size: number }> = ({ size }) => (
+  <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
     <path
       d="M3.5 8.5L6.5 11.5L12.5 5"
       stroke="#fff"

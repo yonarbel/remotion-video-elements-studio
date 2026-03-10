@@ -34,18 +34,29 @@ export const CommandOverlaySchema = z.object({
   label: z.string(),
   prompt: z.string(),
   style: z.enum(["minimal", "terminal"]),
+  size: z.enum(["small", "medium", "large"]),
   showLastLogin: z.boolean(),
 });
 
+const SIZE_CONFIG = {
+  small:  { cmdFont: 20, promptFont: 20, labelFont: 13, pad: "14px 28px", minW: 400, radius: 12, termW: 780, titleFont: 13, titleBarH: 38, bodyPad: "20px 22px", loginFont: 14, cmdTermFont: 15, promptTermFont: 15, dirFont: 15, dotSize: 12, dotGap: 8 },
+  medium: { cmdFont: 28, promptFont: 28, labelFont: 16, pad: "18px 36px", minW: 500, radius: 16, termW: 920, titleFont: 16, titleBarH: 48, bodyPad: "28px 30px", loginFont: 17, cmdTermFont: 20, promptTermFont: 20, dirFont: 20, dotSize: 14, dotGap: 10 },
+  large:  { cmdFont: 36, promptFont: 36, labelFont: 20, pad: "24px 48px", minW: 620, radius: 20, termW: 1100, titleFont: 20, titleBarH: 58, bodyPad: "36px 40px", loginFont: 22, cmdTermFont: 26, promptTermFont: 26, dirFont: 26, dotSize: 16, dotGap: 12 },
+} as const;
+
 /* ─── Traffic-light dots (macOS title bar) ─── */
-const TrafficLight: React.FC<{ opacity: number }> = ({ opacity }) => (
-  <div style={{ display: "flex", gap: 8, opacity }}>
+const TrafficLight: React.FC<{ opacity: number; dotSize?: number; dotGap?: number }> = ({
+  opacity,
+  dotSize = 12,
+  dotGap = 8,
+}) => (
+  <div style={{ display: "flex", gap: dotGap, opacity }}>
     {(["#ff5f57", "#febc2e", "#28c840"] as const).map((c) => (
       <div
         key={c}
         style={{
-          width: 12,
-          height: 12,
+          width: dotSize,
+          height: dotSize,
           borderRadius: "50%",
           backgroundColor: c,
         }}
@@ -121,9 +132,10 @@ const CursorBar: React.FC<{ visible: boolean }> = ({ visible }) => (
    ═══════════════════════════════════════════════ */
 export const CommandOverlay: React.FC<
   z.infer<typeof CommandOverlaySchema>
-> = ({ command, label, prompt, style, showLastLogin }) => {
+> = ({ command, label, prompt, style, size, showLastLogin }) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
+  const sz = SIZE_CONFIG[size];
 
   const typing = useTyping(command, fps, durationInFrames);
 
@@ -181,6 +193,7 @@ export const CommandOverlay: React.FC<
         exitOpacity={exitOpacity}
         fps={fps}
         showLastLogin={showLastLogin}
+        sz={sz}
       >
         {sounds}
       </TerminalStyle>
@@ -199,6 +212,7 @@ export const CommandOverlay: React.FC<
       exitOpacity={exitOpacity}
       fps={fps}
       showLastLogin={showLastLogin}
+      sz={sz}
     >
       {sounds}
     </MinimalStyle>
@@ -219,6 +233,7 @@ interface StyleProps {
   exitOpacity: number;
   fps: number;
   showLastLogin: boolean;
+  sz: typeof SIZE_CONFIG[keyof typeof SIZE_CONFIG];
   children: React.ReactNode;
 }
 
@@ -231,6 +246,7 @@ const MinimalStyle: React.FC<StyleProps> = ({
   labelFade,
   exitProgress,
   exitOpacity,
+  sz,
   children,
 }) => {
   const enterY = interpolate(enterSpring, [0, 1], [120, 0]);
@@ -257,7 +273,7 @@ const MinimalStyle: React.FC<StyleProps> = ({
           <div
             style={{
               fontFamily: sans,
-              fontSize: 13,
+              fontSize: sz.labelFont,
               fontWeight: 600,
               color: "rgba(255,255,255,0.5)",
               textTransform: "uppercase",
@@ -275,18 +291,18 @@ const MinimalStyle: React.FC<StyleProps> = ({
             backgroundColor: "rgba(13, 17, 23, 0.95)",
             backdropFilter: "blur(24px)",
             border: "1px solid rgba(64, 190, 70, 0.2)",
-            borderRadius: 12,
-            padding: "14px 28px",
+            borderRadius: sz.radius,
+            padding: sz.pad,
             display: "flex",
             alignItems: "center",
             boxShadow: `0 8px 40px rgba(0,0,0,0.55), 0 0 0 ${typing.enterKeyFlash * 2}px ${JFROG_GREEN}${Math.round(typing.enterKeyFlash * 40).toString(16).padStart(2, "0")}`,
-            minWidth: 400,
+            minWidth: sz.minW,
           }}
         >
           <span
             style={{
               fontFamily: mono,
-              fontSize: 20,
+              fontSize: sz.promptFont,
               fontWeight: 700,
               color: JFROG_GREEN,
               marginRight: 12,
@@ -297,7 +313,7 @@ const MinimalStyle: React.FC<StyleProps> = ({
           <span
             style={{
               fontFamily: mono,
-              fontSize: 20,
+              fontSize: sz.cmdFont,
               fontWeight: 500,
               color: "#e6edf3",
               whiteSpace: "pre",
@@ -326,6 +342,7 @@ const TerminalStyle: React.FC<StyleProps> = ({
   exitOpacity,
   fps,
   showLastLogin,
+  sz,
   children,
 }) => {
   const frame = useCurrentFrame();
@@ -366,7 +383,7 @@ const TerminalStyle: React.FC<StyleProps> = ({
       >
         <div
           style={{
-            width: 780,
+            width: sz.termW,
             transform: `scale(${scaleIn * exitScale})`,
             opacity: enterOpacity * exitOpacity,
             borderRadius: 10,
@@ -378,7 +395,7 @@ const TerminalStyle: React.FC<StyleProps> = ({
           {/* ── Title bar ── */}
           <div
             style={{
-              height: 38,
+              height: sz.titleBarH,
               backgroundColor: "#2d2d2d",
               display: "flex",
               alignItems: "center",
@@ -386,7 +403,7 @@ const TerminalStyle: React.FC<StyleProps> = ({
               position: "relative",
             }}
           >
-            <TrafficLight opacity={enterOpacity} />
+            <TrafficLight opacity={enterOpacity} dotSize={sz.dotSize} dotGap={sz.dotGap} />
 
             <div
               style={{
@@ -395,7 +412,7 @@ const TerminalStyle: React.FC<StyleProps> = ({
                 right: 0,
                 textAlign: "center",
                 fontFamily: sans,
-                fontSize: 13,
+                fontSize: sz.titleFont,
                 fontWeight: 600,
                 color: "rgba(255,255,255,0.55)",
                 opacity: titleFade,
@@ -410,8 +427,8 @@ const TerminalStyle: React.FC<StyleProps> = ({
           <div
             style={{
               backgroundColor: "#1a1b26",
-              padding: "20px 22px",
-              minHeight: 160,
+              padding: sz.bodyPad,
+              minHeight: sz.titleBarH * 4,
               opacity: bodyFade,
             }}
           >
@@ -419,7 +436,7 @@ const TerminalStyle: React.FC<StyleProps> = ({
               <div
                 style={{
                   fontFamily: mono,
-                  fontSize: 14,
+                  fontSize: sz.loginFont,
                   color: "rgba(255,255,255,0.35)",
                   marginBottom: 14,
                   whiteSpace: "pre",
@@ -436,11 +453,10 @@ const TerminalStyle: React.FC<StyleProps> = ({
                 alignItems: "center",
               }}
             >
-              {/* Directory + chevron */}
               <span
                 style={{
                   fontFamily: mono,
-                  fontSize: 15,
+                  fontSize: sz.dirFont,
                   color: "#6c8ebf",
                   marginRight: 4,
                 }}
@@ -450,7 +466,7 @@ const TerminalStyle: React.FC<StyleProps> = ({
               <span
                 style={{
                   fontFamily: mono,
-                  fontSize: 15,
+                  fontSize: sz.promptTermFont,
                   fontWeight: 700,
                   color: JFROG_GREEN,
                   marginRight: 10,
@@ -459,11 +475,10 @@ const TerminalStyle: React.FC<StyleProps> = ({
                 {prompt}
               </span>
 
-              {/* Typed command */}
               <span
                 style={{
                   fontFamily: mono,
-                  fontSize: 15,
+                  fontSize: sz.cmdTermFont,
                   fontWeight: 500,
                   color: "#e6edf3",
                   whiteSpace: "pre",

@@ -24,14 +24,26 @@ const CL = {
   extrapolateRight: "clamp" as const,
 };
 
+const LOGO_SIZE = {
+  small: { img: 56, glow: 400, mb: 24, accentW: 90 },
+  medium: { img: 80, glow: 600, mb: 32, accentW: 120 },
+  large: { img: 110, glow: 800, mb: 40, accentW: 160 },
+} as const;
+
 export const TitleCardSchema = z.object({
   title: z.string(),
   subtitle: z.string(),
+  titleFontSize: z.number().min(12).max(120),
+  subtitleFontSize: z.number().min(10).max(80),
+  logoSize: z.enum(["small", "medium", "large"]),
 });
 
 export const TitleCard: React.FC<z.infer<typeof TitleCardSchema>> = ({
   title,
   subtitle,
+  titleFontSize,
+  subtitleFontSize,
+  logoSize = "medium",
 }) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
@@ -74,6 +86,8 @@ export const TitleCard: React.FC<z.infer<typeof TitleCardSchema>> = ({
   const exitOpacity = interpolate(exitProgress, [0, 1], [1, 0], CL);
   const exitScale = interpolate(exitProgress, [0, 1], [1, 0.96], CL);
 
+  const logo = LOGO_SIZE[logoSize] ?? LOGO_SIZE.medium;
+
   return (
     <AbsoluteFill
       style={{
@@ -86,19 +100,17 @@ export const TitleCard: React.FC<z.infer<typeof TitleCardSchema>> = ({
         justifyContent: "center",
       }}
     >
-      {/* Subtle radial glow behind logo */}
       <div
         style={{
           position: "absolute",
-          width: 600,
-          height: 600,
+          width: logo.glow,
+          height: logo.glow,
           borderRadius: "50%",
           background: `radial-gradient(circle, ${JFROG_GREEN}08 0%, transparent 70%)`,
           opacity: logoScale,
         }}
       />
 
-      {/* Content */}
       <div
         style={{
           display: "flex",
@@ -107,24 +119,22 @@ export const TitleCard: React.FC<z.infer<typeof TitleCardSchema>> = ({
           gap: 0,
         }}
       >
-        {/* Logo */}
         <div
           style={{
             opacity: logoScale,
             transform: `scale(${interpolate(logoScale, [0, 1], [0.5, 1])})`,
-            marginBottom: 32,
+            marginBottom: logo.mb,
           }}
         >
           <Img
             src={staticFile("jfrog_logo.svg")}
-            style={{ width: 80, height: 80 }}
+            style={{ width: logo.img, height: logo.img }}
           />
         </div>
 
-        {/* Green accent line */}
         <div
           style={{
-            width: interpolate(accentLineWidth, [0, 1], [0, 120]),
+            width: interpolate(accentLineWidth, [0, 1], [0, logo.accentW]),
             height: 3,
             backgroundColor: JFROG_GREEN,
             borderRadius: 2,
@@ -133,10 +143,9 @@ export const TitleCard: React.FC<z.infer<typeof TitleCardSchema>> = ({
           }}
         />
 
-        {/* Title */}
         <div
           style={{
-            fontSize: 52,
+            fontSize: titleFontSize,
             fontWeight: 800,
             color: "#ffffff",
             opacity: titleUp,
@@ -150,22 +159,23 @@ export const TitleCard: React.FC<z.infer<typeof TitleCardSchema>> = ({
           {title}
         </div>
 
-        {/* Subtitle */}
-        <div
-          style={{
-            fontSize: 24,
-            fontWeight: 400,
-            color: JFROG_GREEN,
-            opacity: subtitleUp,
-            transform: `translateY(${interpolate(subtitleUp, [0, 1], [18, 0])}px)`,
-            marginTop: 16,
-            textAlign: "center",
-            maxWidth: 900,
-            lineHeight: 1.4,
-          }}
-        >
-          {subtitle}
-        </div>
+        {subtitle ? (
+          <div
+            style={{
+              fontSize: subtitleFontSize,
+              fontWeight: 400,
+              color: JFROG_GREEN,
+              opacity: subtitleUp,
+              transform: `translateY(${interpolate(subtitleUp, [0, 1], [18, 0])}px)`,
+              marginTop: 16,
+              textAlign: "center",
+              maxWidth: 900,
+              lineHeight: 1.4,
+            }}
+          >
+            {subtitle}
+          </div>
+        ) : null}
       </div>
     </AbsoluteFill>
   );

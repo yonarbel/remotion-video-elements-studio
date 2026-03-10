@@ -53,17 +53,26 @@ const VARIANTS = {
 
 const POSITIONS = ["top-right", "top-left", "bottom-right", "bottom-left"] as const;
 
+const SIZE_CONFIG = {
+  small:  { iconFont: 22, labelFont: 14, textFont: 18, pad: "16px 24px", gap: 8, headerGap: 10, accentW: 5, maxW: 520, radius: 12, margin: 60 },
+  medium: { iconFont: 30, labelFont: 18, textFont: 24, pad: "22px 32px", gap: 12, headerGap: 14, accentW: 6, maxW: 640, radius: 16, margin: 60 },
+  large:  { iconFont: 40, labelFont: 24, textFont: 32, pad: "30px 44px", gap: 16, headerGap: 18, accentW: 8, maxW: 800, radius: 20, margin: 60 },
+} as const;
+
 export const CalloutBoxSchema = z.object({
   type: z.enum(["tip", "warning", "info", "danger"]),
   position: z.enum(POSITIONS),
+  size: z.enum(["small", "medium", "large"]),
   text: z.string(),
 });
 
 export const CalloutBox: React.FC<z.infer<typeof CalloutBoxSchema>> = ({
   type,
   position,
+  size,
   text,
 }) => {
+  const sz = SIZE_CONFIG[size];
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
@@ -73,8 +82,8 @@ export const CalloutBox: React.FC<z.infer<typeof CalloutBoxSchema>> = ({
   const isRight = position.includes("right");
   const isBottom = position.includes("bottom");
 
-  // Off-screen distance — enough to fully hide the box beyond the edge
-  const OFF_SCREEN = 600;
+  // Off-screen distance — must exceed maxWidth + margin to fully hide
+  const OFF_SCREEN = sz.maxW + sz.margin + 100;
   const slideSign = isRight ? 1 : -1;
 
   // ── Enter ──
@@ -131,17 +140,18 @@ export const CalloutBox: React.FC<z.infer<typeof CalloutBoxSchema>> = ({
 
   // Accent bar placement depends on which side the box is on
   const accentOnLeft = isRight;
+  const r = sz.radius;
   const barRadius = accentOnLeft
-    ? "3px 0 0 3px"
-    : "0 3px 3px 0";
+    ? `${r / 4}px 0 0 ${r / 4}px`
+    : `0 ${r / 4}px ${r / 4}px 0`;
   const cardRadius = accentOnLeft
-    ? "0 12px 12px 0"
-    : "12px 0 0 12px";
+    ? `0 ${r}px ${r}px 0`
+    : `${r}px 0 0 ${r}px`;
 
   const positionStyle: React.CSSProperties = {
     position: "absolute",
-    ...(isRight ? { right: 60 } : { left: 60 }),
-    ...(isBottom ? { bottom: 60 } : { top: 60 }),
+    ...(isRight ? { right: sz.margin } : { left: sz.margin }),
+    ...(isBottom ? { bottom: sz.margin } : { top: sz.margin }),
   };
 
   return (
@@ -162,13 +172,13 @@ export const CalloutBox: React.FC<z.infer<typeof CalloutBoxSchema>> = ({
           alignItems: "stretch",
           transform: `translateX(${translateX}px)`,
           opacity: exitOpacity,
-          maxWidth: 520,
+          maxWidth: sz.maxW,
         }}
       >
         {/* Accent bar */}
         <div
           style={{
-            width: 5,
+            width: sz.accentW,
             backgroundColor: v.accent,
             borderRadius: barRadius,
             transform: `scaleY(${accentGrow})`,
@@ -187,17 +197,17 @@ export const CalloutBox: React.FC<z.infer<typeof CalloutBoxSchema>> = ({
             ...(accentOnLeft
               ? { borderLeft: "none" }
               : { borderRight: "none" }),
-            padding: "16px 24px",
+            padding: sz.pad,
             boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
             display: "flex",
             flexDirection: "column",
-            gap: 8,
+            gap: sz.gap,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: sz.headerGap }}>
             <span
               style={{
-                fontSize: 22,
+                fontSize: sz.iconFont,
                 opacity: iconPop,
                 transform: `scale(${interpolate(iconPop, [0, 1], [0.3, 1])})`,
               }}
@@ -207,7 +217,7 @@ export const CalloutBox: React.FC<z.infer<typeof CalloutBoxSchema>> = ({
             <span
               style={{
                 fontFamily: sans,
-                fontSize: 14,
+                fontSize: sz.labelFont,
                 fontWeight: 700,
                 color: v.accent,
                 textTransform: "uppercase",
@@ -223,7 +233,7 @@ export const CalloutBox: React.FC<z.infer<typeof CalloutBoxSchema>> = ({
           <div
             style={{
               fontFamily: sans,
-              fontSize: 18,
+              fontSize: sz.textFont,
               fontWeight: 500,
               color: "#e6edf3",
               lineHeight: 1.5,

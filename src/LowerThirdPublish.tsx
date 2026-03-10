@@ -29,14 +29,22 @@ const CL = {
   extrapolateRight: "clamp" as const,
 };
 
+const SIZE_CONFIG = {
+  small:  { logo: 44, divH: 40, titleFont: 22, subFont: 14, pad: "16px 32px 16px 20px", gap: 20, textGap: 4, accentW: 5, radius: 10, bottom: 80, left: 80 },
+  medium: { logo: 60, divH: 54, titleFont: 30, subFont: 18, pad: "22px 44px 22px 28px", gap: 28, textGap: 6, accentW: 6, radius: 14, bottom: 80, left: 80 },
+  large:  { logo: 80, divH: 70, titleFont: 40, subFont: 24, pad: "30px 56px 30px 36px", gap: 36, textGap: 8, accentW: 7, radius: 16, bottom: 80, left: 80 },
+} as const;
+
 export interface LowerThirdProps {
   title: string;
   subtitle: string;
+  size: "small" | "medium" | "large";
 }
 
-export const LowerThird: React.FC<LowerThirdProps> = ({ title, subtitle }) => {
+export const LowerThird: React.FC<LowerThirdProps> = ({ title, subtitle, size = "small" }) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
+  const sz = SIZE_CONFIG[size] ?? SIZE_CONFIG.small;
 
   const exitStart = durationInFrames - Math.round(fps * 0.8);
 
@@ -54,8 +62,8 @@ export const LowerThird: React.FC<LowerThirdProps> = ({ title, subtitle }) => {
       <div
         style={{
           position: "absolute",
-          bottom: 80,
-          left: 80,
+          bottom: sz.bottom,
+          left: sz.left,
           display: "flex",
           alignItems: "stretch",
           transform: `translateY(${masterTranslateY}px)`,
@@ -64,9 +72,9 @@ export const LowerThird: React.FC<LowerThirdProps> = ({ title, subtitle }) => {
       >
         <div
           style={{
-            width: 5,
+            width: sz.accentW,
             backgroundColor: JFROG_GREEN,
-            borderRadius: "3px 0 0 3px",
+            borderRadius: `${sz.radius / 3}px 0 0 ${sz.radius / 3}px`,
             transform: `scaleY(${accentSlide})`,
             transformOrigin: "bottom",
             boxShadow: `0 0 12px ${JFROG_GREEN}60`,
@@ -76,11 +84,11 @@ export const LowerThird: React.FC<LowerThirdProps> = ({ title, subtitle }) => {
           style={{
             backgroundColor: BAR_BG,
             backdropFilter: "blur(20px)",
-            borderRadius: "0 10px 10px 0",
+            borderRadius: `0 ${sz.radius}px ${sz.radius}px 0`,
             display: "flex",
             alignItems: "center",
-            gap: 20,
-            padding: "16px 32px 16px 20px",
+            gap: sz.gap,
+            padding: sz.pad,
             transform: `scaleX(${panelExpand})`,
             transformOrigin: "left",
             overflow: "hidden",
@@ -96,23 +104,23 @@ export const LowerThird: React.FC<LowerThirdProps> = ({ title, subtitle }) => {
           >
             <Img
               src={staticFile("jfrog_logo.svg")}
-              style={{ width: 44, height: 44 }}
+              style={{ width: sz.logo, height: sz.logo }}
             />
           </div>
           <div
             style={{
               width: 1,
-              height: 40,
+              height: sz.divH,
               backgroundColor: "rgba(255,255,255,0.12)",
               flexShrink: 0,
               opacity: logoAppear,
             }}
           />
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: sz.textGap }}>
             <div
               style={{
                 fontFamily: sans,
-                fontSize: 22,
+                fontSize: sz.titleFont,
                 fontWeight: 700,
                 color: "#ffffff",
                 opacity: titleAppear,
@@ -122,18 +130,22 @@ export const LowerThird: React.FC<LowerThirdProps> = ({ title, subtitle }) => {
             >
               {title}
             </div>
-            <div
-              style={{
-                fontFamily: mono,
-                fontSize: 14,
-                color: JFROG_GREEN,
-                opacity: subtitleAppear,
-                transform: `translateX(${interpolate(subtitleAppear, [0, 1], [16, 0])}px)`,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {subtitle}
-            </div>
+            {subtitle ? (
+              <div
+                style={{
+                  fontFamily: mono,
+                  fontSize: sz.subFont,
+                  fontWeight: 400,
+                  color: JFROG_GREEN,
+                  opacity: subtitleAppear,
+                  transform: `translateX(${interpolate(subtitleAppear, [0, 1], [16, 0])}px)`,
+                  whiteSpace: "nowrap",
+                  lineHeight: 1.4,
+                }}
+              >
+                {subtitle}
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
@@ -145,9 +157,11 @@ export const LowerThird: React.FC<LowerThirdProps> = ({ title, subtitle }) => {
 export const LowerThirdSchema = z.object({
   title: z.string(),
   subtitle: z.string(),
+  size: z.enum(["small", "medium", "large"]),
 });
 
 export const LowerThirdGeneric: React.FC<z.infer<typeof LowerThirdSchema>> = ({
   title,
   subtitle,
-}) => <LowerThird title={title} subtitle={subtitle} />;
+  size,
+}) => <LowerThird title={title} subtitle={subtitle} size={size} />;
