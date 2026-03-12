@@ -23,6 +23,10 @@ import {
   calculateStopwatchDuration,
 } from "./StopwatchCounter";
 import { CodeSnippet, CodeSnippetSchema } from "./CodeSnippet";
+import { ComparisonTable, ComparisonTableSchema } from "./ComparisonTable";
+import { LifecyclePromotion } from "./LifecyclePromotion";
+import { FlyingWords, FlyingWordsSchema } from "./FlyingWords";
+import { SlackThread } from "./SlackThread";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -208,6 +212,56 @@ export const RemotionRoot: React.FC = () => {
           size: "medium" as const,
         }}
         durationInFrames={240}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="ComparisonTable"
+        component={ComparisonTable}
+        schema={ComparisonTableSchema}
+        defaultProps={{
+          headers: "Feature, Community, Pro, Enterprise",
+          rows: "Skill Publishing, ✓, ✓, ✓; Evidence Signing, ✗, ✓, ✓; Security Scanning, ✗, Basic, Advanced; Role-Based Access, ✗, ✗, ✓; SLA Support, ✗, ✗, ✓",
+          accentColumn: 3,
+          size: "medium" as const,
+          animateRows: true,
+        }}
+        durationInFrames={240}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="FlyingWords"
+        component={FlyingWords}
+        schema={FlyingWordsSchema}
+        defaultProps={{
+          words: "DEV, QA, PROD",
+          mode: "accumulate" as const,
+          direction: "bottom" as const,
+          separator: "arrow" as const,
+          size: "medium" as const,
+          colors: "#ffffff",
+          separatorColor: "#40BE46",
+        }}
+        durationInFrames={180}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="SlackThread"
+        component={SlackThread}
+        durationInFrames={240}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="LifecyclePromotion"
+        component={LifecyclePromotion}
+        durationInFrames={300}
         fps={30}
         width={1920}
         height={1080}

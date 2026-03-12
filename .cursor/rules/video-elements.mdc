@@ -1,0 +1,231 @@
+---
+description: Remotion video element library — reusable parametrized overlays and compositions for tutorial and marketing video production
+globs:
+  - src/**/*.tsx
+alwaysApply: false
+---
+
+# Remotion Video Elements Library
+
+This project contains a library of reusable Remotion video elements for tutorial and marketing video production. All parametrized elements use Zod schemas editable from the Remotion Studio sidebar. Rendering supports transparent backgrounds (ProRes 4444).
+
+## Rendering
+
+- Default codec: ProRes 4444 with PNG image format for transparency
+- CLI: `npx remotion render <CompositionId> out/video.mov`
+- Pixel format: `yuva444p10le` (set in `remotion.config.ts`)
+- All overlay elements use `backgroundColor: "transparent"` so they can be composited in external editors
+
+## Assets
+
+Static assets live in `public/`:
+- `jfrog_logo.svg` — JFrog logo
+- `docker_logo.svg` — Docker logo
+- `npm_logo.svg` — npm logo
+
+Reference them with `staticFile("filename.svg")`.
+
+---
+
+## Parametrized Elements (editable from Studio sidebar)
+
+### 1. LowerThird
+
+**File:** `src/LowerThirdPublish.tsx`
+**Composition ID:** `LowerThird`
+**Use case:** Overlay bar at bottom-left identifying the current scene/step in a video. Has JFrog logo, green accent bar, title, and subtitle.
+
+| Parameter  | Type                             | Default            | Description                          |
+|------------|----------------------------------|--------------------|--------------------------------------|
+| `title`    | string                           | "Your Title Here"  | Main title text                      |
+| `subtitle` | string                           | "Your subtitle here" | Smaller subtitle in green          |
+| `size`     | `"small"` / `"medium"` / `"large"` | `"small"`          | Overall scale                        |
+
+---
+
+### 2. TitleCard
+
+**File:** `src/TitleCard.tsx`
+**Composition ID:** `TitleCard`
+**Use case:** Full-screen intro/outro card with JFrog branding, centered logo, accent line, title, and subtitle.
+
+| Parameter         | Type                             | Default           | Description            |
+|-------------------|----------------------------------|-------------------|------------------------|
+| `title`           | string                           | "Your Video Title" | Main title            |
+| `subtitle`        | string                           | "A short description..." | Subtitle in green |
+| `titleFontSize`   | number (12–120)                  | 52                | Title font size        |
+| `subtitleFontSize` | number (10–80)                  | 24                | Subtitle font size     |
+| `logoSize`        | `"small"` / `"medium"` / `"large"` | `"medium"`       | Logo and glow size     |
+
+---
+
+### 3. CalloutBox
+
+**File:** `src/CalloutBox.tsx`
+**Composition ID:** `CalloutBox`
+**Use case:** Corner overlay callout for tips, warnings, info, or danger notices. Slides in from outside the screen with whoosh/whip sounds.
+
+| Parameter  | Type                                                       | Default       | Description                    |
+|------------|-----------------------------------------------------------|---------------|--------------------------------|
+| `type`     | `"tip"` / `"warning"` / `"info"` / `"danger"`            | `"tip"`       | Visual style and icon          |
+| `position` | `"top-right"` / `"top-left"` / `"bottom-right"` / `"bottom-left"` | `"top-right"` | Screen corner position |
+| `size`     | `"small"` / `"medium"` / `"large"`                       | `"small"`     | Overall scale                  |
+| `text`     | string                                                     | (tip text)    | Callout message                |
+
+---
+
+### 4. CommandOverlay
+
+**File:** `src/CommandOverlay.tsx`
+**Composition ID:** `CommandOverlay`
+**Use case:** Animated terminal command display with typing animation and keystroke sounds. Two styles: minimal floating bar or full macOS-like terminal window.
+
+| Parameter       | Type                                  | Default                              | Description                  |
+|-----------------|---------------------------------------|--------------------------------------|------------------------------|
+| `command`       | string                                | "jf skill publish --sign --evidence" | Command to type              |
+| `label`         | string                                | "Terminal"                           | Label text (minimal style)   |
+| `prompt`        | string                                | "»"                                  | Prompt character             |
+| `style`         | `"minimal"` / `"terminal"`            | `"terminal"`                         | Visual style                 |
+| `size`          | `"small"` / `"medium"` / `"large"`    | `"small"`                            | Overall scale                |
+| `showLastLogin` | boolean                               | false                                | Show "Last login" line       |
+
+---
+
+### 5. StepProgressBar
+
+**File:** `src/StepProgressBar.tsx`
+**Composition ID:** `StepProgressBar`
+**Use case:** Horizontal step-by-step progress indicator that advances through labeled steps. Optional confetti celebration and circular loading animation on the last step.
+
+| Parameter         | Type                                | Default                                    | Description                        |
+|-------------------|-------------------------------------|--------------------------------------------|------------------------------------|
+| `steps`           | string (comma-separated)            | "Create Skill, Sign & Publish, Install, Execute" | Step labels                  |
+| `position`        | `"top"` / `"bottom"`               | `"top"`                                    | Bar position on screen             |
+| `size`            | `"small"` / `"medium"` / `"large"` | `"medium"`                                 | Overall scale                      |
+| `celebrate`       | boolean                             | true                                       | Confetti + shake on completion     |
+| `celebrationHold` | number (0–10)                       | 2                                          | Seconds to hold celebration        |
+
+---
+
+### 6. AgendaList
+
+**File:** `src/AgendaList.tsx`
+**Composition ID:** `AgendaList`
+**Use case:** Animated list of agenda/talking points that appear one by one. Great for "today we'll cover..." intros.
+
+| Parameter     | Type                                     | Default          | Description                    |
+|---------------|------------------------------------------|------------------|--------------------------------|
+| `heading`     | string                                   | "Today we'll cover" | Section heading             |
+| `items`       | string (comma-separated)                 | (4 sample items) | List items                     |
+| `bulletStyle` | `"number"` / `"dot"` / `"dash"` / `"arrow"` | `"number"`    | Bullet style                   |
+| `position`    | `"center"` / `"left"` / `"right"`       | `"center"`       | Card alignment                 |
+| `sizePct`     | number (10–100)                          | 100              | Uniform scale percentage       |
+
+---
+
+### 7. SubscribeReminder
+
+**File:** `src/SubscribeReminder.tsx`
+**Composition ID:** `SubscribeReminder`
+**Use case:** YouTube-style subscribe/like/bell reminder overlay with animated cursor clicking like then bell, bell shakes and turns gold.
+
+| Parameter | Type                                | Default    | Description   |
+|-----------|-------------------------------------|------------|---------------|
+| `size`    | `"small"` / `"medium"` / `"large"` | `"medium"` | Overall scale |
+
+---
+
+### 8. StopwatchCounter
+
+**File:** `src/StopwatchCounter.tsx`
+**Composition ID:** `StopwatchCounter`
+**Use case:** Real-time stopwatch that counts from 00:00 to a target time, then blinks red. Duration auto-adjusts via `calculateMetadata`. Three visual styles.
+
+| Parameter          | Type                                          | Default     | Description                     |
+|--------------------|-----------------------------------------------|-------------|---------------------------------|
+| `targetMinutes`    | number (0–59)                                 | 2           | Target minutes                  |
+| `targetSeconds`    | number (0–59)                                 | 30          | Target seconds                  |
+| `style`            | `"digital"` / `"airport"` / `"analog"`        | `"digital"` | Visual style                    |
+| `size`             | `"small"` / `"medium"` / `"large"`            | `"medium"`  | Overall scale                   |
+| `showMilliseconds` | boolean                                       | true        | Show centiseconds (digital/airport only) |
+
+**Note:** Composition duration auto-calculates based on target time + enter/blink/exit buffer.
+
+---
+
+### 9. CodeSnippet
+
+**File:** `src/CodeSnippet.tsx`
+**Composition ID:** `CodeSnippet`
+**Use case:** Syntax-highlighted code viewer with macOS-style window chrome. Supports 20 languages, 8 themes, and multiple animation modes. Line highlighting can animate sequentially.
+
+| Parameter          | Type                                          | Default         | Description                                |
+|--------------------|-----------------------------------------------|-----------------|--------------------------------------------|
+| `code`             | textarea (multiline string)                   | (sample TS)     | Code content                               |
+| `language`         | dropdown (20 languages)                       | `"typescript"`  | javascript, typescript, python, bash, go, rust, java, json, yaml, css, html, sql, etc. |
+| `theme`            | dropdown (8 themes)                           | `"dracula"`     | dracula, vs-dark, night-owl, one-dark, synthwave-84, oceanic-next, palenight, okaidia |
+| `title`            | string                                        | "publish-skill.ts" | Window title bar text                   |
+| `showLineNumbers`  | boolean                                       | true            | Show line numbers                          |
+| `highlightLines`   | string (comma-separated line numbers)         | "3,4,5,6,7"    | Lines to highlight with green accent       |
+| `animateHighlight` | boolean                                       | true            | Highlights appear one by one after code renders |
+| `singleHighlight`  | boolean                                       | true            | Only one line highlighted at a time (traveling highlight) |
+| `animation`        | `"none"` / `"typewriter"` / `"line-by-line"`  | `"line-by-line"` | Code reveal animation                     |
+| `size`             | `"small"` / `"medium"` / `"large"`            | `"medium"`      | Overall scale                              |
+
+---
+
+### 10. ComparisonTable
+
+**File:** `src/ComparisonTable.tsx`
+**Composition ID:** `ComparisonTable`
+**Use case:** Feature comparison table with animated row reveal. Supports check/cross icons and an accented "recommended" column.
+
+| Parameter      | Type                                | Default                   | Description                              |
+|----------------|-------------------------------------|---------------------------|------------------------------------------|
+| `headers`      | string (comma-separated)            | "Feature, Community, Pro, Enterprise" | Column headers              |
+| `rows`         | string (`;` separates rows, `,` separates cells) | (5 sample rows) | Table data. Use `✓`/`yes`/`check` for green check, `✗`/`no`/`cross` for red cross |
+| `accentColumn` | number (0–10)                       | 3                         | Column index to highlight as recommended |
+| `size`         | `"small"` / `"medium"` / `"large"` | `"medium"`                | Overall scale                            |
+| `animateRows`  | boolean                             | true                      | Staggered row entrance animation         |
+
+### 11. FlyingWords
+
+**File:** `src/FlyingWords.tsx`
+**Composition ID:** `FlyingWords`
+**Use case:** Animated text reveal where comma-separated words fly in one-by-one with whoosh sound effects. Great for highlighting key concepts (e.g., "DEV, QA, PROD"), agenda items, or feature lists.
+
+| Parameter        | Type                                  | Default            | Description                                                                  |
+| ---------------- | ------------------------------------- | ------------------ | ---------------------------------------------------------------------------- |
+| `words`          | string (comma-separated)              | `"DEV, QA, PROD"`  | Words to animate, separated by commas                                        |
+| `mode`           | `"accumulate"` / `"replace"`          | `"accumulate"`     | **accumulate:** all stay, exit together. **replace:** one at a time, swaps.  |
+| `direction`      | `"left"` / `"right"` / `"top"` / `"bottom"` | `"bottom"`  | Direction words fly in from (exit goes opposite)                             |
+| `separator`      | `"none"` / `"dot"` / `"pipe"` / `"arrow"` / `"dash"` | `"arrow"` | Visual separator between words (accumulate mode only)               |
+| `size`           | `"small"` / `"medium"` / `"large"`   | `"medium"`         | Overall scale (48 / 72 / 100px font)                                         |
+| `colors`         | string (single or comma-separated hex) | `"#ffffff"`       | Single color for all words, or comma-delimited per-word colors               |
+| `separatorColor` | string (hex)                          | `"#40BE46"`        | Color of the separator element between words                                 |
+
+---
+
+## Common Patterns
+
+- **Sound effects:** Most elements use `whoosh` (entrance), `whip` (exit), `ding` (completion), `mouseClick` (interactions) from `@remotion/sfx`
+- **Fonts:** Inter (UI text), JetBrains Mono (code/terminal)
+- **Brand colors:** JFrog Green `#40BE46`, dark background `#0a0c10`
+- **Size variants:** Most elements offer `small` / `medium` / `large` for flexible overlay sizing
+- **Transparent rendering:** All overlay elements support transparent backgrounds for compositing
+
+---
+
+## Custom Animations
+
+This project uses **Remotion** (React-based video framework) to create programmatic video compositions. Beyond the parametrized elements listed above, custom one-off animations can be created for any specific purpose — sequence diagrams, product demos, UI mockups, data visualizations, or any scenario that benefits from precise frame-by-frame animation control.
+
+When the user needs a custom animation:
+1. Create a new `.tsx` file in `src/` with a React component
+2. Use Remotion primitives: `useCurrentFrame()`, `useVideoConfig()`, `interpolate()`, `spring()`, `Sequence`, `Audio`
+3. Register it as a `<Composition>` in `src/Root.tsx`
+4. Use `@remotion/google-fonts` for typography (Inter for UI, JetBrains Mono for code)
+5. Use `@remotion/sfx` for sound effects (`whoosh`, `whip`, `ding`, `mouseClick`, `uiSwitch`)
+6. Reference static assets with `staticFile()` from the `public/` folder
+7. For parametrized elements, define a Zod schema and pass it to `<Composition schema={...}>` so props are editable from the Studio sidebar
+8. Preview in Remotion Studio with `npm run dev`, render with `npx remotion render <CompositionId> out/video.mov`
