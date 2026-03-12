@@ -27,6 +27,7 @@ import { ComparisonTable, ComparisonTableSchema } from "./ComparisonTable";
 import { LifecyclePromotion } from "./LifecyclePromotion";
 import { FlyingWords, FlyingWordsSchema } from "./FlyingWords";
 import { SlackThread } from "./SlackThread";
+import { PolicyBlockScene } from "./PolicyBlockScene";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -262,6 +263,14 @@ export const RemotionRoot: React.FC = () => {
         id="LifecyclePromotion"
         component={LifecyclePromotion}
         durationInFrames={300}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="PolicyBlockScene"
+        component={PolicyBlockScene}
+        durationInFrames={510}
         fps={30}
         width={1920}
         height={1080}
